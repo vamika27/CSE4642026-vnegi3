@@ -34,7 +34,7 @@ public class Graph {
         }
     }
 
-    // ========== Remove APIs ==========
+    // remove APIs
 
     public void removeNode(String label) {
         if (!nodes.contains(label)) {
@@ -65,7 +65,7 @@ public class Graph {
         edges.get(srcLabel).remove(dstLabel);
     }
 
-    // ========== Graph Search (merged BFS + DFS with Algorithm enum) ==========
+    // graph search
 
     public Path GraphSearch(String src, String dst, Algorithm algo) {
         if (!nodes.contains(src) || !nodes.contains(dst)) {
@@ -117,7 +117,7 @@ public class Graph {
         return null;
     }
 
-    // ========== Existing APIs ==========
+    // existing APIs
 
     public int getNodeCount() {
         return nodes.size();

@@ -6,8 +6,6 @@ import java.util.NoSuchElementException;
 
 public class GraphTest {
 
-    // ========== Existing Part 1 Tests ==========
-
     @Test
     public void testParseGraph() throws Exception {
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
@@ -78,8 +76,6 @@ public class GraphTest {
         assertTrue(file.exists());
     }
 
-    // ========== Scenario 1: Correct removal of nodes and edges ==========
-
     @Test
     public void testRemoveNode() throws Exception {
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
@@ -112,8 +108,6 @@ public class GraphTest {
         assertTrue(graph.getNodes().contains("b"));
     }
 
-    // ========== Scenario 2: Removing non-existent nodes causes exceptions ==========
-
     @Test
     public void testRemoveNonExistentNode() {
         Graph graph = new Graph();
@@ -130,8 +124,6 @@ public class GraphTest {
             graph.removeNodes(new String[]{"a", "nonexistent"});
         });
     }
-
-    // ========== Scenario 3: Removing non-existent edges causes exceptions ==========
 
     @Test
     public void testRemoveNonExistentEdge() {
@@ -151,8 +143,6 @@ public class GraphTest {
             graph.removeEdge("a", "z");
         });
     }
-
-    // ========== BFS Graph Search Tests ==========
 
     @Test
     public void testBFSPathExists() throws Exception {
@@ -187,9 +177,6 @@ public class GraphTest {
         Path path = graph.GraphSearch("a", "z", Algorithm.BFS);
         assertNull(path);
     }
-
-    // ========== DFS Graph Search Tests ==========
-
     @Test
     public void testDFSPathExists() throws Exception {
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
