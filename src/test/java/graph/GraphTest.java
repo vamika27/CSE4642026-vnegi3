@@ -83,13 +83,10 @@ public class GraphTest {
     @Test
     public void testRemoveNode() throws Exception {
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
-        // input1.dot has: a->b, b->c, c->d, d->a, a->e, e->f, e->g, f->h, g->h
-        // Removing "a" should remove node a, edges a->b, a->e (outgoing), and d->a (incoming)
         graph.removeNode("a");
         assertEquals(7, graph.getNodeCount());
         assertFalse(graph.getNodes().contains("a"));
         assertFalse(graph.getEdges().containsKey("a"));
-        // d->a should be removed
         assertFalse(graph.getEdges().get("d").contains("a"));
     }
 
@@ -100,7 +97,6 @@ public class GraphTest {
         assertEquals(6, graph.getNodeCount());
         assertFalse(graph.getNodes().contains("f"));
         assertFalse(graph.getNodes().contains("g"));
-        // e->f and e->g should be gone
         assertFalse(graph.getEdges().get("e").contains("f"));
         assertFalse(graph.getEdges().get("e").contains("g"));
     }
@@ -108,11 +104,10 @@ public class GraphTest {
     @Test
     public void testRemoveEdge() throws Exception {
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
-        int edgesBefore = graph.getEdgeCount(); // 9
+        int edgesBefore = graph.getEdgeCount();
         graph.removeEdge("a", "b");
         assertEquals(edgesBefore - 1, graph.getEdgeCount());
         assertFalse(graph.getEdges().get("a").contains("b"));
-        // Node "a" and "b" should still exist
         assertTrue(graph.getNodes().contains("a"));
         assertTrue(graph.getNodes().contains("b"));
     }
@@ -131,7 +126,6 @@ public class GraphTest {
     @Test
     public void testRemoveNodesOneNonExistent() throws Exception {
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
-        // "a" exists but "nonexistent" does not
         assertThrows(NoSuchElementException.class, () -> {
             graph.removeNodes(new String[]{"a", "nonexistent"});
         });
@@ -144,7 +138,6 @@ public class GraphTest {
         Graph graph = new Graph();
         graph.addEdge("a", "b");
         graph.addNode("c");
-        // a->c does not exist, but both nodes a and c exist
         assertThrows(NoSuchElementException.class, () -> {
             graph.removeEdge("a", "c");
         });
@@ -154,9 +147,47 @@ public class GraphTest {
     public void testRemoveEdgeWithNonExistentNode() {
         Graph graph = new Graph();
         graph.addNode("a");
-        // "z" does not exist as a node at all
         assertThrows(NoSuchElementException.class, () -> {
             graph.removeEdge("a", "z");
         });
+    }
+
+    // ========== BFS Graph Search Tests ==========
+
+    @Test
+    public void testBFSPathExists() throws Exception {
+        // input1.dot: a->b, b->c, c->d, d->a, a->e, e->f, e->g, f->h, g->h
+        // BFS from a to h: a -> e -> f -> h (or a -> e -> g -> h)
+        Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
+        Path path = graph.GraphSearch("a", "h");
+        assertNotNull(path);
+        assertEquals("a", path.getNodes().get(0));
+        assertEquals("h", path.getNodes().get(path.getNodes().size() - 1));
+    }
+
+    @Test
+    public void testBFSPathNotExists() throws Exception {
+        // h has no outgoing edges, so no path from h to a
+        Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
+        Path path = graph.GraphSearch("h", "a");
+        assertNull(path);
+    }
+
+    @Test
+    public void testBFSSameNode() {
+        Graph graph = new Graph();
+        graph.addNode("a");
+        Path path = graph.GraphSearch("a", "a");
+        assertNotNull(path);
+        assertEquals(1, path.getNodes().size());
+        assertEquals("a", path.getNodes().get(0));
+    }
+
+    @Test
+    public void testBFSNodeNotInGraph() {
+        Graph graph = new Graph();
+        graph.addNode("a");
+        Path path = graph.GraphSearch("a", "z");
+        assertNull(path);
     }
 }
