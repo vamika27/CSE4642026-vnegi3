@@ -65,23 +65,28 @@ public class Graph {
         edges.get(srcLabel).remove(dstLabel);
     }
 
-    // ========== BFS Graph Search ==========
+    // ========== Graph Search (merged BFS + DFS with Algorithm enum) ==========
 
-    public Path GraphSearch(String src, String dst) {
+    public Path GraphSearch(String src, String dst, Algorithm algo) {
         if (!nodes.contains(src) || !nodes.contains(dst)) {
             return null;
         }
 
-        Queue<String> queue = new LinkedList<>();
+        Deque<String> frontier = new LinkedList<>();
         Map<String, String> parentMap = new HashMap<>();
         Set<String> visited = new HashSet<>();
 
-        queue.add(src);
+        frontier.add(src);
         visited.add(src);
         parentMap.put(src, null);
 
-        while (!queue.isEmpty()) {
-            String current = queue.poll();
+        while (!frontier.isEmpty()) {
+            String current;
+            if (algo == Algorithm.BFS) {
+                current = frontier.pollFirst();  // Queue behavior: remove from front
+            } else {
+                current = frontier.pollLast();   // Stack behavior: remove from back
+            }
 
             if (current.equals(dst)) {
                 // Reconstruct path
@@ -104,7 +109,7 @@ public class Graph {
                     if (!visited.contains(neighbor)) {
                         visited.add(neighbor);
                         parentMap.put(neighbor, current);
-                        queue.add(neighbor);
+                        frontier.add(neighbor);
                     }
                 }
             }

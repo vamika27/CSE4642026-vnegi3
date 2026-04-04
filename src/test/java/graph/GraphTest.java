@@ -156,10 +156,8 @@ public class GraphTest {
 
     @Test
     public void testBFSPathExists() throws Exception {
-        // input1.dot: a->b, b->c, c->d, d->a, a->e, e->f, e->g, f->h, g->h
-        // BFS from a to h: a -> e -> f -> h (or a -> e -> g -> h)
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
-        Path path = graph.GraphSearch("a", "h");
+        Path path = graph.GraphSearch("a", "h", Algorithm.BFS);
         assertNotNull(path);
         assertEquals("a", path.getNodes().get(0));
         assertEquals("h", path.getNodes().get(path.getNodes().size() - 1));
@@ -167,9 +165,8 @@ public class GraphTest {
 
     @Test
     public void testBFSPathNotExists() throws Exception {
-        // h has no outgoing edges, so no path from h to a
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
-        Path path = graph.GraphSearch("h", "a");
+        Path path = graph.GraphSearch("h", "a", Algorithm.BFS);
         assertNull(path);
     }
 
@@ -177,7 +174,7 @@ public class GraphTest {
     public void testBFSSameNode() {
         Graph graph = new Graph();
         graph.addNode("a");
-        Path path = graph.GraphSearch("a", "a");
+        Path path = graph.GraphSearch("a", "a", Algorithm.BFS);
         assertNotNull(path);
         assertEquals(1, path.getNodes().size());
         assertEquals("a", path.getNodes().get(0));
@@ -187,7 +184,43 @@ public class GraphTest {
     public void testBFSNodeNotInGraph() {
         Graph graph = new Graph();
         graph.addNode("a");
-        Path path = graph.GraphSearch("a", "z");
+        Path path = graph.GraphSearch("a", "z", Algorithm.BFS);
+        assertNull(path);
+    }
+
+    // ========== DFS Graph Search Tests ==========
+
+    @Test
+    public void testDFSPathExists() throws Exception {
+        Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
+        Path path = graph.GraphSearch("a", "h", Algorithm.DFS);
+        assertNotNull(path);
+        assertEquals("a", path.getNodes().get(0));
+        assertEquals("h", path.getNodes().get(path.getNodes().size() - 1));
+    }
+
+    @Test
+    public void testDFSPathNotExists() throws Exception {
+        Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
+        Path path = graph.GraphSearch("h", "a", Algorithm.DFS);
+        assertNull(path);
+    }
+
+    @Test
+    public void testDFSSameNode() {
+        Graph graph = new Graph();
+        graph.addNode("a");
+        Path path = graph.GraphSearch("a", "a", Algorithm.DFS);
+        assertNotNull(path);
+        assertEquals(1, path.getNodes().size());
+        assertEquals("a", path.getNodes().get(0));
+    }
+
+    @Test
+    public void testDFSNodeNotInGraph() {
+        Graph graph = new Graph();
+        graph.addNode("a");
+        Path path = graph.GraphSearch("a", "z", Algorithm.DFS);
         assertNull(path);
     }
 }
