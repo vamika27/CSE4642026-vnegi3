@@ -34,17 +34,14 @@ public class Graph {
         }
     }
 
-    // ========== NEW: Remove APIs ==========
+    // ========== Remove APIs ==========
 
     public void removeNode(String label) {
         if (!nodes.contains(label)) {
             throw new NoSuchElementException("Node '" + label + "' does not exist in the graph.");
         }
-        // Remove the node itself
         nodes.remove(label);
-        // Remove all outgoing edges from this node
         edges.remove(label);
-        // Remove all incoming edges to this node
         for (Set<String> dsts : edges.values()) {
             dsts.remove(label);
         }
@@ -66,6 +63,53 @@ public class Graph {
                 "Edge '" + srcLabel + " -> " + dstLabel + "' does not exist in the graph.");
         }
         edges.get(srcLabel).remove(dstLabel);
+    }
+
+    // ========== BFS Graph Search ==========
+
+    public Path GraphSearch(String src, String dst) {
+        if (!nodes.contains(src) || !nodes.contains(dst)) {
+            return null;
+        }
+
+        Queue<String> queue = new LinkedList<>();
+        Map<String, String> parentMap = new HashMap<>();
+        Set<String> visited = new HashSet<>();
+
+        queue.add(src);
+        visited.add(src);
+        parentMap.put(src, null);
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+
+            if (current.equals(dst)) {
+                // Reconstruct path
+                Path path = new Path();
+                List<String> reversed = new ArrayList<>();
+                String node = dst;
+                while (node != null) {
+                    reversed.add(node);
+                    node = parentMap.get(node);
+                }
+                Collections.reverse(reversed);
+                for (String n : reversed) {
+                    path.addNode(n);
+                }
+                return path;
+            }
+
+            if (edges.containsKey(current)) {
+                for (String neighbor : edges.get(current)) {
+                    if (!visited.contains(neighbor)) {
+                        visited.add(neighbor);
+                        parentMap.put(neighbor, current);
+                        queue.add(neighbor);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     // ========== Existing APIs ==========
