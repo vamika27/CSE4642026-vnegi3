@@ -316,9 +316,123 @@ sample_inputs/graph_output.png
 
 ---
 
+## Project Part 2
+
+---
+
+## Feature 5 – Remove Node, Remove Nodes, and Remove Edge APIs
+
+Three new APIs were added to support removing nodes and edges from the graph.
+
+API: removeNode(String label)
+
+Removes a single node and all its incoming and outgoing edges. Throws NoSuchElementException if the node does not exist.
+
+API: removeNodes(String[] labels)
+
+Removes multiple nodes by calling removeNode() for each label. Throws NoSuchElementException if any node does not exist.
+
+API: removeEdge(String srcLabel, String dstLabel)
+
+Removes a single directed edge. The nodes remain in the graph. Throws NoSuchElementException if either node or the edge does not exist.
+
+Test cases cover three scenarios:
+- Scenario 1: Nodes and edges are correctly removed
+- Scenario 2: Removing non-existent nodes causes exceptions
+- Scenario 3: Removing non-existent edges causes exceptions
+
+Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/ea7cc9194b137f14ce91b1108da73404faa20cc6
+
+---
+
+## Feature 6 – Continuous Integration with GitHub Actions
+
+A GitHub Actions CI workflow was added at .github/workflows/ci.yml. The workflow automatically builds and tests the project on every push to main, bfs, and dfs branches.
+
+Steps performed by the workflow:
+1. Checkout repository
+2. Set up JDK 17
+3. Install Graphviz
+4. Build and test with mvn package
+
+Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/da3371afe9b62cc8f35f1354d10c7f1ee099ea0a
+
+---
+
+## Feature 7 – BFS Graph Search (bfs branch)
+
+A graph search API was implemented on the bfs branch using the Breadth-First Search algorithm.
+
+API: Path GraphSearch(String src, String dst)
+
+Uses a Queue to explore nodes level by level. Returns a Path object representing the path from src to dst, or null if no path exists.
+
+A new Path class was created to represent a path as n1 -> n2 -> n3.
+
+Branch: https://github.com/vamika27/CSE4642026-vnegi3/tree/bfs
+
+Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/d463ad2ff6f3c6820113b2dcc77a439f894f2322
+
+---
+
+## Feature 8 – DFS Graph Search (dfs branch)
+
+The same graph search API was implemented on the dfs branch using the Depth-First Search algorithm.
+
+API: Path GraphSearch(String src, String dst)
+
+Uses a Stack instead of a Queue to explore nodes depth-first. Returns a Path object or null if no path exists.
+
+Branch: https://github.com/vamika27/CSE4642026-vnegi3/tree/dfs
+
+Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/16cf1dee54f586ba6998d26cc5395bd561b6a039
+
+---
+
+## Feature 9 – Merge BFS and DFS with Conflict Resolution
+
+The bfs branch was merged into main first (clean merge). Then the dfs branch was merged into main, producing a merge conflict because both branches added a GraphSearch method with the same signature.
+
+The conflict was resolved by introducing an Algorithm enum and updating the method signature:
+
+API: Path GraphSearch(String src, String dst, Algorithm algo)
+
+The Algorithm enum has two values: BFS and DFS. Internally the method uses a Deque, polling from the front for BFS (queue behavior) and from the back for DFS (stack behavior).
+
+Example:
+
+    Path bfsPath = graph.GraphSearch("a", "h", Algorithm.BFS);  // a -> e -> f -> h
+    Path dfsPath = graph.GraphSearch("a", "h", Algorithm.DFS);  // a -> e -> g -> h
+
+Merge bfs commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/9fbcac15db00cf76d8efd60d959b7277a7690d63
+
+Merge dfs commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/4855d94ed102097274f0e3b9455086ffdd0fd702
+
+---
+
+## Unit Testing (Final)
+
+The final test suite contains 22 tests:
+
+Part 1 tests (7): testParseGraph, testAddNode, testAddNodes, testAddEdge, testOutputGraph, testOutputDOTGraph, testOutputGraphics
+
+Remove API tests (7): testRemoveNode, testRemoveNodes, testRemoveEdge, testRemoveNonExistentNode, testRemoveNodesOneNonExistent, testRemoveNonExistentEdge, testRemoveEdgeWithNonExistentNode
+
+BFS tests (4): testBFSPathExists, testBFSPathNotExists, testBFSSameNode, testBFSNodeNotInGraph
+
+DFS tests (4): testDFSPathExists, testDFSPathNotExists, testDFSSameNode, testDFSNodeNotInGraph
+
+Result:
+
+Tests run: 22  
+Failures: 0  
+Errors: 0  
+BUILD SUCCESS
+
+---
+
 ## Conclusion
 
-This project implements a directed graph processing system capable of parsing DOT graphs, performing node and edge operations, exporting graphs to multiple formats, and generating visualizations using Graphviz.
+This project implements a directed graph processing system capable of parsing DOT graphs, performing node and edge operations, removing nodes and edges, searching for paths using BFS and DFS algorithms, exporting graphs to multiple formats, and generating visualizations using Graphviz.
 
-All features are verified through automated unit tests and the project builds successfully using Maven.
-
+All features are verified through 22 automated unit tests and the project builds successfully using Maven. Continuous integration is configured through GitHub Actions.
