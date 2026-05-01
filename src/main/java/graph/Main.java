@@ -5,13 +5,13 @@ public class Main {
 
         Graph graph = GraphParser.parseGraph("sample_inputs/input1.dot");
 
+        SearchStrategy bfs = new BFSStrategy();
+        SearchStrategy dfs = new DFSStrategy();
+
         System.out.println("===== BFS =====");
-        Path bfsPath = graph.GraphSearch("a", "h", Algorithm.BFS);
-        System.out.println(bfsPath);
+        System.out.println(bfs.search(graph, "a", "h"));
 
         System.out.println("\n===== DFS =====");
-        Path dfsPath = graph.GraphSearch("a", "h", Algorithm.DFS);
-        System.out.println(dfsPath);
-
+        System.out.println(dfs.search(graph, "a", "h"));
     }
 }
