@@ -90,6 +90,13 @@ public class Graph {
         return edges.getOrDefault(node, Collections.emptySet());
     }
 
+    private String getNextNode(Deque<String> frontier, Algorithm algo) {
+        if (algo == Algorithm.BFS) {
+            return frontier.pollFirst();
+        }
+        return frontier.pollLast();
+    }
+
     public Path GraphSearch(String src, String dst, Algorithm algo) {
         if (!isValidNodes(src, dst)) {
             return null;
@@ -104,12 +111,7 @@ public class Graph {
         parentMap.put(src, null);
 
         while (!frontier.isEmpty()) {
-            String current;
-            if (algo == Algorithm.BFS) {
-                current = frontier.pollFirst();
-            } else {
-                current = frontier.pollLast();
-            }
+            String current = getNextNode(frontier, algo);
 
             if (current.equals(dst)) {
                 return buildPath(dst, parentMap);
