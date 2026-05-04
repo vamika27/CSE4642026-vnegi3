@@ -98,35 +98,15 @@ public class Graph {
     }
 
     public Path GraphSearch(String src, String dst, Algorithm algo) {
-        if (!isValidNodes(src, dst)) {
-            return null;
+        GraphSearchTemplate searcher;
+
+        if (algo == Algorithm.BFS) {
+            searcher = new BFSSearch();
+        } else {
+            searcher = new DFSSearch();
         }
 
-        Deque<String> frontier = new LinkedList<>();
-        Map<String, String> parentMap = new HashMap<>();
-        Set<String> visited = new HashSet<>();
-
-        frontier.add(src);
-        visited.add(src);
-        parentMap.put(src, null);
-
-        while (!frontier.isEmpty()) {
-            String current = getNextNode(frontier, algo);
-
-            if (current.equals(dst)) {
-                return buildPath(dst, parentMap);
-            }
-
-            for (String neighbor : getNeighbors(current)) {
-                if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    parentMap.put(neighbor, current);
-                    frontier.add(neighbor);
-                }
-            }
-        }
-
-        return null;
+        return searcher.search(this, src, dst);
     }
 
     public int getNodeCount() {
