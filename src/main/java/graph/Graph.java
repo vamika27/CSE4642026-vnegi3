@@ -29,8 +29,8 @@ public class Graph {
     public void addEdge(String src, String dst) {
         addNode(src);
         addNode(dst);
-        if (!edges.get(src).contains(dst)) {
-            edges.get(src).add(dst);
+        if (!getNeighbors(src).contains(dst)) {
+            getNeighbors(src).add(dst);
         }
     }
 
@@ -56,11 +56,11 @@ public class Graph {
             throw new NoSuchElementException(
                     "Node '" + srcLabel + "' or '" + dstLabel + "' does not exist in the graph.");
         }
-        if (!edges.containsKey(srcLabel) || !edges.get(srcLabel).contains(dstLabel)) {
+        if (!edges.containsKey(srcLabel) || !getNeighbors(srcLabel).contains(dstLabel)) {
             throw new NoSuchElementException(
                     "Edge '" + srcLabel + " -> " + dstLabel + "' does not exist in the graph.");
         }
-        edges.get(srcLabel).remove(dstLabel);
+        getNeighbors(srcLabel).remove(dstLabel);
     }
 
     private boolean isValidNodes(String src, String dst) {
@@ -84,6 +84,10 @@ public class Graph {
         }
 
         return path;
+    }
+
+    public Set<String> getNeighbors(String node) {
+        return edges.getOrDefault(node, Collections.emptySet());
     }
 
     public Path GraphSearch(String src, String dst, Algorithm algo) {
@@ -111,13 +115,11 @@ public class Graph {
                 return buildPath(dst, parentMap);
             }
 
-            if (edges.containsKey(current)) {
-                for (String neighbor : edges.get(current)) {
-                    if (!visited.contains(neighbor)) {
-                        visited.add(neighbor);
-                        parentMap.put(neighbor, current);
-                        frontier.add(neighbor);
-                    }
+            for (String neighbor : getNeighbors(current)) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    parentMap.put(neighbor, current);
+                    frontier.add(neighbor);
                 }
             }
         }
@@ -153,7 +155,7 @@ public class Graph {
         StringBuilder sb = new StringBuilder();
         sb.append("digraph {\n");
         for (String src : edges.keySet()) {
-            for (String dst : edges.get(src)) {
+            for (String dst : getNeighbors(src)) {
                 sb.append("    ").append(src).append(" -> ").append(dst).append(";\n");
             }
         }
@@ -194,7 +196,7 @@ public class Graph {
         sb.append("Edges:\n");
 
         for (String src : edges.keySet()) {
-            for (String dst : edges.get(src)) {
+            for (String dst : getNeighbors(src)) {
                 sb.append(src).append(" -> ").append(dst).append("\n");
             }
         }
