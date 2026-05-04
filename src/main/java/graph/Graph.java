@@ -34,8 +34,6 @@ public class Graph {
         }
     }
 
-    // remove APIs
-
     public void removeNode(String label) {
         if (!nodes.contains(label)) {
             throw new NoSuchElementException("Node '" + label + "' does not exist in the graph.");
@@ -54,21 +52,23 @@ public class Graph {
     }
 
     public void removeEdge(String srcLabel, String dstLabel) {
-        if (!nodes.contains(srcLabel) || !nodes.contains(dstLabel)) {
+        if (!isValidNodes(srcLabel, dstLabel)) {
             throw new NoSuchElementException(
-                "Node '" + srcLabel + "' or '" + dstLabel + "' does not exist in the graph.");
+                    "Node '" + srcLabel + "' or '" + dstLabel + "' does not exist in the graph.");
         }
         if (!edges.containsKey(srcLabel) || !edges.get(srcLabel).contains(dstLabel)) {
             throw new NoSuchElementException(
-                "Edge '" + srcLabel + " -> " + dstLabel + "' does not exist in the graph.");
+                    "Edge '" + srcLabel + " -> " + dstLabel + "' does not exist in the graph.");
         }
         edges.get(srcLabel).remove(dstLabel);
     }
 
-    // graph search
+    private boolean isValidNodes(String src, String dst) {
+        return nodes.contains(src) && nodes.contains(dst);
+    }
 
     public Path GraphSearch(String src, String dst, Algorithm algo) {
-        if (!nodes.contains(src) || !nodes.contains(dst)) {
+        if (!isValidNodes(src, dst)) {
             return null;
         }
 
@@ -83,24 +83,27 @@ public class Graph {
         while (!frontier.isEmpty()) {
             String current;
             if (algo == Algorithm.BFS) {
-                current = frontier.pollFirst();  // Queue behavior: remove from front
+                current = frontier.pollFirst();
             } else {
-                current = frontier.pollLast();   // Stack behavior: remove from back
+                current = frontier.pollLast();
             }
 
             if (current.equals(dst)) {
-                // Reconstruct path
                 Path path = new Path();
                 List<String> reversed = new ArrayList<>();
+
                 String node = dst;
                 while (node != null) {
                     reversed.add(node);
                     node = parentMap.get(node);
                 }
+
                 Collections.reverse(reversed);
+
                 for (String n : reversed) {
                     path.addNode(n);
                 }
+
                 return path;
             }
 
@@ -114,10 +117,9 @@ public class Graph {
                 }
             }
         }
+
         return null;
     }
-
-    // existing APIs
 
     public int getNodeCount() {
         return nodes.size();
@@ -158,7 +160,9 @@ public class Graph {
     public void outputGraphics(String path, String format) throws IOException, InterruptedException {
         String dotFile = path + ".dot";
         String outputFile = path + "." + format;
+
         outputDOTGraph(dotFile);
+
         ProcessBuilder pb = new ProcessBuilder(
                 "dot",
                 "-T" + format,
@@ -166,9 +170,11 @@ public class Graph {
                 "-o",
                 outputFile
         );
+
         pb.inheritIO();
         Process process = pb.start();
         int exitCode = process.waitFor();
+
         if (exitCode != 0) {
             throw new RuntimeException("Graphviz failed to generate graphics.");
         }
@@ -177,15 +183,18 @@ public class Graph {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+
         sb.append("Number of nodes: ").append(getNodeCount()).append("\n");
         sb.append("Nodes: ").append(nodes).append("\n");
         sb.append("Number of edges: ").append(getEdgeCount()).append("\n");
         sb.append("Edges:\n");
+
         for (String src : edges.keySet()) {
             for (String dst : edges.get(src)) {
                 sb.append(src).append(" -> ").append(dst).append("\n");
             }
         }
+
         return sb.toString();
     }
 }
