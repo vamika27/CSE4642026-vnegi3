@@ -11,6 +11,10 @@ public class SearchStrategyFactory {
             return new DFSStrategy();
         }
 
+        if (algo == Algorithm.RANDOM) {
+            return new RandomWalkStrategy();
+        }
+
         throw new IllegalArgumentException("Unsupported algorithm: " + algo);
     }
 }
