@@ -98,15 +98,8 @@ public class Graph {
     }
 
     public Path GraphSearch(String src, String dst, Algorithm algo) {
-        GraphSearchTemplate searcher;
-
-        if (algo == Algorithm.BFS) {
-            searcher = new BFSSearch();
-        } else {
-            searcher = new DFSSearch();
-        }
-
-        return searcher.search(this, src, dst);
+        SearchStrategy strategy = SearchStrategyFactory.getStrategy(algo);
+        return strategy.search(this, src, dst);
     }
 
     public int getNodeCount() {
