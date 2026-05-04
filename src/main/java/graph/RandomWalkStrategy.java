@@ -1,8 +1,8 @@
 package graph;
 
-public class DFSStrategy implements SearchStrategy {
+public class RandomWalkStrategy implements SearchStrategy {
 
-    private final GraphSearchTemplate searchTemplate = new DFSSearch();
+    private final GraphSearchTemplate searchTemplate = new RandomWalkSearch();
 
     @Override
     public Path search(Graph graph, String src, String dst) {

@@ -29,12 +29,10 @@ public class Graph {
     public void addEdge(String src, String dst) {
         addNode(src);
         addNode(dst);
-        if (!edges.get(src).contains(dst)) {
-            edges.get(src).add(dst);
+        if (!getNeighbors(src).contains(dst)) {
+            getNeighbors(src).add(dst);
         }
     }
-
-    // remove APIs
 
     public void removeNode(String label) {
         if (!nodes.contains(label)) {
@@ -54,70 +52,55 @@ public class Graph {
     }
 
     public void removeEdge(String srcLabel, String dstLabel) {
-        if (!nodes.contains(srcLabel) || !nodes.contains(dstLabel)) {
+        if (!isValidNodes(srcLabel, dstLabel)) {
             throw new NoSuchElementException(
-                "Node '" + srcLabel + "' or '" + dstLabel + "' does not exist in the graph.");
+                    "Node '" + srcLabel + "' or '" + dstLabel + "' does not exist in the graph.");
         }
-        if (!edges.containsKey(srcLabel) || !edges.get(srcLabel).contains(dstLabel)) {
+        if (!edges.containsKey(srcLabel) || !getNeighbors(srcLabel).contains(dstLabel)) {
             throw new NoSuchElementException(
-                "Edge '" + srcLabel + " -> " + dstLabel + "' does not exist in the graph.");
+                    "Edge '" + srcLabel + " -> " + dstLabel + "' does not exist in the graph.");
         }
-        edges.get(srcLabel).remove(dstLabel);
+        getNeighbors(srcLabel).remove(dstLabel);
     }
 
-    // graph search
+    private boolean isValidNodes(String src, String dst) {
+        return nodes.contains(src) && nodes.contains(dst);
+    }
+
+    private Path buildPath(String dst, Map<String, String> parentMap) {
+        Path path = new Path();
+        List<String> reversed = new ArrayList<>();
+
+        String node = dst;
+        while (node != null) {
+            reversed.add(node);
+            node = parentMap.get(node);
+        }
+
+        Collections.reverse(reversed);
+
+        for (String n : reversed) {
+            path.addNode(n);
+        }
+
+        return path;
+    }
+
+    public Set<String> getNeighbors(String node) {
+        return edges.getOrDefault(node, Collections.emptySet());
+    }
+
+    private String getNextNode(Deque<String> frontier, Algorithm algo) {
+        if (algo == Algorithm.BFS) {
+            return frontier.pollFirst();
+        }
+        return frontier.pollLast();
+    }
 
     public Path GraphSearch(String src, String dst, Algorithm algo) {
-        if (!nodes.contains(src) || !nodes.contains(dst)) {
-            return null;
-        }
-
-        Deque<String> frontier = new LinkedList<>();
-        Map<String, String> parentMap = new HashMap<>();
-        Set<String> visited = new HashSet<>();
-
-        frontier.add(src);
-        visited.add(src);
-        parentMap.put(src, null);
-
-        while (!frontier.isEmpty()) {
-            String current;
-            if (algo == Algorithm.BFS) {
-                current = frontier.pollFirst();  // Queue behavior: remove from front
-            } else {
-                current = frontier.pollLast();   // Stack behavior: remove from back
-            }
-
-            if (current.equals(dst)) {
-                // Reconstruct path
-                Path path = new Path();
-                List<String> reversed = new ArrayList<>();
-                String node = dst;
-                while (node != null) {
-                    reversed.add(node);
-                    node = parentMap.get(node);
-                }
-                Collections.reverse(reversed);
-                for (String n : reversed) {
-                    path.addNode(n);
-                }
-                return path;
-            }
-
-            if (edges.containsKey(current)) {
-                for (String neighbor : edges.get(current)) {
-                    if (!visited.contains(neighbor)) {
-                        visited.add(neighbor);
-                        parentMap.put(neighbor, current);
-                        frontier.add(neighbor);
-                    }
-                }
-            }
-        }
-        return null;
+        SearchStrategy strategy = SearchStrategyFactory.getStrategy(algo);
+        return strategy.search(this, src, dst);
     }
-
-    // existing APIs
 
     public int getNodeCount() {
         return nodes.size();
@@ -147,7 +130,7 @@ public class Graph {
         StringBuilder sb = new StringBuilder();
         sb.append("digraph {\n");
         for (String src : edges.keySet()) {
-            for (String dst : edges.get(src)) {
+            for (String dst : getNeighbors(src)) {
                 sb.append("    ").append(src).append(" -> ").append(dst).append(";\n");
             }
         }
@@ -158,7 +141,9 @@ public class Graph {
     public void outputGraphics(String path, String format) throws IOException, InterruptedException {
         String dotFile = path + ".dot";
         String outputFile = path + "." + format;
+
         outputDOTGraph(dotFile);
+
         ProcessBuilder pb = new ProcessBuilder(
                 "dot",
                 "-T" + format,
@@ -166,9 +151,11 @@ public class Graph {
                 "-o",
                 outputFile
         );
+
         pb.inheritIO();
         Process process = pb.start();
         int exitCode = process.waitFor();
+
         if (exitCode != 0) {
             throw new RuntimeException("Graphviz failed to generate graphics.");
         }
@@ -177,15 +164,18 @@ public class Graph {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+
         sb.append("Number of nodes: ").append(getNodeCount()).append("\n");
         sb.append("Nodes: ").append(nodes).append("\n");
         sb.append("Number of edges: ").append(getEdgeCount()).append("\n");
         sb.append("Edges:\n");
+
         for (String src : edges.keySet()) {
-            for (String dst : edges.get(src)) {
+            for (String dst : getNeighbors(src)) {
                 sb.append(src).append(" -> ").append(dst).append("\n");
             }
         }
+
         return sb.toString();
     }
 }
