@@ -67,6 +67,25 @@ public class Graph {
         return nodes.contains(src) && nodes.contains(dst);
     }
 
+    private Path buildPath(String dst, Map<String, String> parentMap) {
+        Path path = new Path();
+        List<String> reversed = new ArrayList<>();
+
+        String node = dst;
+        while (node != null) {
+            reversed.add(node);
+            node = parentMap.get(node);
+        }
+
+        Collections.reverse(reversed);
+
+        for (String n : reversed) {
+            path.addNode(n);
+        }
+
+        return path;
+    }
+
     public Path GraphSearch(String src, String dst, Algorithm algo) {
         if (!isValidNodes(src, dst)) {
             return null;
@@ -89,22 +108,7 @@ public class Graph {
             }
 
             if (current.equals(dst)) {
-                Path path = new Path();
-                List<String> reversed = new ArrayList<>();
-
-                String node = dst;
-                while (node != null) {
-                    reversed.add(node);
-                    node = parentMap.get(node);
-                }
-
-                Collections.reverse(reversed);
-
-                for (String n : reversed) {
-                    path.addNode(n);
-                }
-
-                return path;
+                return buildPath(dst, parentMap);
             }
 
             if (edges.containsKey(current)) {
