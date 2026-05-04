@@ -1,438 +1,153 @@
-# CSE 464 Project – Graph Processing System
+# CSE 464 Project Part 3 – Graph Search Refactoring
 
 ## Student Information
-Name: Vamika Negi  
-Course: CSE 464 – Software QA and Testing  
-Repository: https://github.com/vamika27/CSE4642026-vnegi3  
+- Name: Vamika Negi
+- ASU ID: 1226812251
+
+## Repository Information
+- Repository: https://github.com/vamika27/CSE4642026-vnegi3
+- Branch: refactor
+- Pull Request: https://github.com/vamika27/CSE4642026-vnegi3/pull/1
 
 ---
 
 ## Project Overview
+This project refactors an existing graph search system using software design patterns.
+The implementation improves modularity, extensibility, and maintainability by applying structured refactoring techniques and introducing Template, Strategy, and Factory patterns.
 
-This project implements a directed graph processing system in Java. The system reads graphs defined in DOT format, stores them internally, and supports multiple operations for manipulating and exporting graph data.
-
-The implementation includes:
-
-- Parsing DOT graph files
-- Adding nodes to the graph
-- Adding edges to the graph
-- Preventing duplicate nodes and edges
-- Exporting graph data to text format
-- Exporting graph data to DOT format
-- Generating graphical visualizations using Graphviz
-- Automated unit testing using JUnit
-- Maven-based build and testing
+Additionally, a Random Walk search algorithm was implemented with dead-end handling and restart logic to ensure valid path discovery when possible.
 
 ---
 
-## Development Environment
+## Build Instructions
+mvn clean package
 
-The following tools were used to implement and test the project:
-
-Operating System: macOS  
-Programming Language: Java (JDK 17)  
-IDE: IntelliJ IDEA  
-Build Tool: Maven  
-Testing Framework: JUnit 5  
-Visualization Tool: Graphviz  
-Version Control: Git and GitHub  
-
-Graphviz is used to generate graphical PNG representations of graphs from DOT files.
+## Run Instructions
+java -cp target/CSE4642026-vnegi3-1.0-SNAPSHOT.jar graph.Main
 
 ---
 
-## Project Structure
+## Refactoring Commits
 
-The project follows the standard Maven directory structure:
+Refactor 1 – Format & Clean Project  
+https://github.com/vamika27/CSE4642026-vnegi3/commit/ea1c14c
 
-CSE4642026-vnegi3  
-│  
-├── pom.xml  
-├── README.md  
-│  
-├── sample_inputs  
-│   ├── input1.dot  
-│   ├── outputGraph.txt  
-│   ├── output1.dot  
-│   ├── graph_output.dot  
-│   └── graph_output.png  
-│  
-├── src  
-│   ├── main  
-│   │   └── java  
-│   │       └── graph  
-│   │           ├── Graph.java  
-│   │           └── GraphParser.java  
-│   │  
-│   └── test  
-│       └── java  
-│           └── graph  
-│               └── GraphTest.java  
+Refactor 2 – Extract Node Validation  
+https://github.com/vamika27/CSE4642026-vnegi3/commit/8687b42
+
+Refactor 3 – Extract Path Reconstruction  
+https://github.com/vamika27/CSE4642026-vnegi3/commit/6843adc
+
+Refactor 4 – Extract Neighbor Lookup  
+https://github.com/vamika27/CSE4642026-vnegi3/commit/322d27c
+
+Refactor 5 – Extract Frontier Selection  
+https://github.com/vamika27/CSE4642026-vnegi3/commit/76743be
 
 ---
 
-## Feature 1 – Parse DOT Graph
+## Template Pattern
 
-API:
+The Template Pattern is implemented through the GraphSearchTemplate class.
+It defines a consistent structure for all graph traversal algorithms, including:
 
-parseGraph(String filepath)
+- Input validation
+- Frontier creation and management
+- Node expansion
+- Path construction
 
-This method reads a DOT file and constructs a directed graph. The parser processes each line of the DOT file and extracts node labels and directed edges.
+This allows BFS, DFS, and other algorithms to share a common framework while customizing specific steps.
 
-Example DOT input:
-
-digraph {
-a -> b;
-b -> c;
-}
-
-Nodes and edges are stored internally in the Graph class.
-
-The graph can be printed using the toString() method which outputs:
-
-- number of nodes
-- node labels
-- number of edges
-- edge list
-
-Example output:
-
-Number of nodes: 8  
-Nodes: [a, b, c, d, e, f, g, h]  
-Number of edges: 9  
-Edges:  
-a -> b  
-b -> c  
-
-Unit tests verify that parsing correctly identifies node and edge counts.
+Commit:
+https://github.com/vamika27/CSE4642026-vnegi3/commit/4b0d7ef
 
 ---
 
-## Feature 2 – Add Node Operations
+## Strategy Pattern
 
-APIs:
+The Strategy Pattern enables dynamic selection of graph search algorithms at runtime.
 
-addNode(String label)  
-addNodes(String[] labels)
+Components:
+- SearchStrategy interface
+- BFSStrategy, DFSStrategy, RandomWalkStrategy implementations
+- SearchStrategyFactory for algorithm selection
 
-These functions allow nodes to be added to the graph dynamically.
+This design decouples algorithm selection from execution logic, improving flexibility and scalability.
 
-Nodes are stored using a LinkedHashSet which prevents duplicates.
-
-Example:
-
-graph.addNode("a")  
-graph.addNode("a")
-
-Result:
-
-Node count remains 1 because duplicate nodes are ignored.
-
-Unit tests verify node insertion and duplicate prevention.
+Commit:
+https://github.com/vamika27/CSE4642026-vnegi3/commit/76d87d3
 
 ---
 
-## Feature 3 – Add Edge Operations
+## Factory Pattern
 
-API:
+The Factory Pattern is implemented in SearchStrategyFactory.
 
-addEdge(String srcLabel, String dstLabel)
-
-This method creates a directed edge between two nodes.
-
-Behavior:
-
-- Automatically creates nodes if they do not exist
-- Prevents duplicate edges
-- Stores edges in an adjacency map
-
-Example:
-
-graph.addEdge("a","b")  
-graph.addEdge("a","b")
-
-Result:
-
-Edge count remains 1 because duplicate edges are ignored.
-
-Unit tests verify that edges are correctly added and duplicates are prevented.
+- Encapsulates logic for selecting the appropriate search strategy
+- Returns the correct strategy based on the chosen algorithm (BFS, DFS, Random Walk)
+- Reduces coupling between the Graph class and algorithm implementations
 
 ---
 
-## Feature 4 – Output Graph Representations
+## Random Walk Search
 
-The graph can be exported in multiple formats.
+The Random Walk algorithm performs traversal by randomly selecting unvisited neighbors.
 
-### Text Output
+Features:
+- Random neighbor selection
+- Tracks visited nodes to avoid cycles
+- Detects dead ends
+- Restarts traversal when no unvisited neighbors remain
 
-API:
+This ensures that the algorithm continues attempting until a valid path is found if one exists.
 
-outputGraph(String filepath)
+Commits:
+- Initial implementation:
+  https://github.com/vamika27/CSE4642026-vnegi3/commit/2dba610
 
-This writes the graph’s textual representation to a file.
-
-Example output:
-
-Number of nodes: 8  
-Nodes: [a,b,c,d,e,f,g,h]  
-Number of edges: 9  
-Edges:  
-a -> b  
-
----
-
-### DOT Output
-
-API:
-
-outputDOTGraph(String filepath)
-
-This writes the graph in DOT format.
-
-Example:
-
-digraph {
-a -> b;
-b -> c;
-}
+- Dead-end restart fix:
+  https://github.com/vamika27/CSE4642026-vnegi3/commit/b229947
 
 ---
 
-### Graph Visualization
+## Example Execution
 
-API:
-
-outputGraphics(String filepath, String format)
-
-This method generates graphical visualizations using Graphviz.
-
-Process:
-
-1. Generate a DOT file
-2. Call Graphviz
-3. Produce a PNG image
-
-Example command executed internally:
-
-dot -Tpng graph_output.dot -o graph_output.png
-
----
-
-## Unit Testing
-
-JUnit 5 tests were written to verify all features.
-
-Tests include:
-
-- testParseGraph
-- testAddNode
-- testAddNodes
-- testAddEdge
-- testOutputGraph
-- testOutputDOTGraph
-- testOutputGraphics
-
-Run tests with:
-
-mvn test
-
-Result:
-
-Tests run: 7  
-Failures: 0  
-Errors: 0  
-BUILD SUCCESS
-
----
-
-## Maven Build
-
-The project uses Maven for build and dependency management.
-
-Compile and run tests:
-
-mvn clean test
-
-Package the project:
-
-mvn package
-
-Successful builds produce:
-
-target/CSE4642026-vnegi3-1.0-SNAPSHOT.jar
-
----
-
-## Repository
-
-GitHub Repository:
-
-https://github.com/vamika27/CSE4642026-vnegi3
-
-The repository contains:
-
-- source code
-- unit tests
-- Maven configuration
-- example graph input files
-- generated graph outputs
-
-Commits correspond to the implemented features:
-
-Feature 1 – DOT parsing  
-Feature 2 – unit tests  
-Feature 3 – edge operations  
-Feature 4 – graph output and visualization
-
----
-
-## How to Run
-
-Clone the repository:
-
-git clone https://github.com/vamika27/CSE4642026-vnegi3
-
-Navigate to the project directory:
-
-cd CSE4642026-vnegi3
-
-Run tests:
-
-mvn clean test
-
-Build project:
-
-mvn package
-
-Sample input file:
-
+Using input file:
 sample_inputs/input1.dot
 
-Generated outputs:
+Expected outputs:
 
-sample_inputs/outputGraph.txt  
-sample_inputs/output1.dot  
-sample_inputs/graph_output.png  
+BFS:
+a -> e -> f -> h
 
----
+DFS:
+a -> e -> g -> h
 
-## Project Part 2
-
----
-
-## Feature 5 – Remove Node, Remove Nodes, and Remove Edge APIs
-
-Three new APIs were added to support removing nodes and edges from the graph.
-
-API: removeNode(String label)
-
-Removes a single node and all its incoming and outgoing edges. Throws NoSuchElementException if the node does not exist.
-
-API: removeNodes(String[] labels)
-
-Removes multiple nodes by calling removeNode() for each label. Throws NoSuchElementException if any node does not exist.
-
-API: removeEdge(String srcLabel, String dstLabel)
-
-Removes a single directed edge. The nodes remain in the graph. Throws NoSuchElementException if either node or the edge does not exist.
-
-Test cases cover three scenarios:
-- Scenario 1: Nodes and edges are correctly removed
-- Scenario 2: Removing non-existent nodes causes exceptions
-- Scenario 3: Removing non-existent edges causes exceptions
-
-Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/ea7cc9194b137f14ce91b1108da73404faa20cc6
+Random Walk:
+Performs multiple attempts and restarts when dead ends are encountered until a valid path is found.
 
 ---
 
-## Feature 6 – Continuous Integration with GitHub Actions
+## Pull Request Review
 
-A GitHub Actions CI workflow was added at .github/workflows/ci.yml. The workflow automatically builds and tests the project on every push to main, bfs, and dfs branches.
+Pull Request:
+https://github.com/vamika27/CSE4642026-vnegi3/pull/1
 
-Steps performed by the workflow:
-1. Checkout repository
-2. Set up JDK 17
-3. Install Graphviz
-4. Build and test with mvn package
-
-Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/da3371afe9b62cc8f35f1354d10c7f1ee099ea0a
-
----
-
-## Feature 7 – BFS Graph Search (bfs branch)
-
-A graph search API was implemented on the bfs branch using the Breadth-First Search algorithm.
-
-API: Path GraphSearch(String src, String dst)
-
-Uses a Queue to explore nodes level by level. Returns a Path object representing the path from src to dst, or null if no path exists.
-
-A new Path class was created to represent a path as n1 -> n2 -> n3.
-
-Branch: https://github.com/vamika27/CSE4642026-vnegi3/tree/bfs
-
-Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/d463ad2ff6f3c6820113b2dcc77a439f894f2322
+Includes:
+- Refactoring commits with clear separation of concerns
+- Template Pattern implementation
+- Strategy Pattern implementation
+- Factory Pattern integration
+- Random Walk algorithm with restart logic
+- Inline PR comments explaining design decisions
 
 ---
 
-## Feature 8 – DFS Graph Search (dfs branch)
+## Summary
 
-The same graph search API was implemented on the dfs branch using the Depth-First Search algorithm.
-
-API: Path GraphSearch(String src, String dst)
-
-Uses a Stack instead of a Queue to explore nodes depth-first. Returns a Path object or null if no path exists.
-
-Branch: https://github.com/vamika27/CSE4642026-vnegi3/tree/dfs
-
-Commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/16cf1dee54f586ba6998d26cc5395bd561b6a039
-
----
-
-## Feature 9 – Merge BFS and DFS with Conflict Resolution
-
-The bfs branch was merged into main first (clean merge). Then the dfs branch was merged into main, producing a merge conflict because both branches added a GraphSearch method with the same signature.
-
-The conflict was resolved by introducing an Algorithm enum and updating the method signature:
-
-API: Path GraphSearch(String src, String dst, Algorithm algo)
-
-The Algorithm enum has two values: BFS and DFS. Internally the method uses a Deque, polling from the front for BFS (queue behavior) and from the back for DFS (stack behavior).
-
-Example:
-
-    Path bfsPath = graph.GraphSearch("a", "h", Algorithm.BFS);  // a -> e -> f -> h
-    Path dfsPath = graph.GraphSearch("a", "h", Algorithm.DFS);  // a -> e -> g -> h
-
-Merge bfs commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/9fbcac15db00cf76d8efd60d959b7277a7690d63
-
-Merge dfs commit: https://github.com/vamika27/CSE4642026-vnegi3/commit/4855d94ed102097274f0e3b9455086ffdd0fd702
-
----
-
-## Unit Testing (Final)
-
-The final test suite contains 22 tests:
-
-Part 1 tests (7): testParseGraph, testAddNode, testAddNodes, testAddEdge, testOutputGraph, testOutputDOTGraph, testOutputGraphics
-
-Remove API tests (7): testRemoveNode, testRemoveNodes, testRemoveEdge, testRemoveNonExistentNode, testRemoveNodesOneNonExistent, testRemoveNonExistentEdge, testRemoveEdgeWithNonExistentNode
-
-BFS tests (4): testBFSPathExists, testBFSPathNotExists, testBFSSameNode, testBFSNodeNotInGraph
-
-DFS tests (4): testDFSPathExists, testDFSPathNotExists, testDFSSameNode, testDFSNodeNotInGraph
-
-Result:
-
-Tests run: 22  
-Failures: 0  
-Errors: 0  
-BUILD SUCCESS
-
----
-
-## Conclusion
-
-This project implements a directed graph processing system capable of parsing DOT graphs, performing node and edge operations, removing nodes and edges, searching for paths using BFS and DFS algorithms, exporting graphs to multiple formats, and generating visualizations using Graphviz.
-
-All features are verified through 22 automated unit tests and the project builds successfully using Maven. Continuous integration is configured through GitHub Actions.
+This project demonstrates:
+- Effective use of refactoring techniques
+- Application of multiple design patterns
+- Clean separation of concerns
+- Improved maintainability and extensibility
+- Robust handling of edge cases in graph traversal
